@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { AppHeader } from "@/components/app-header"
 import { StatCard } from "@/components/stat-card"
 import { BedGrid } from "@/components/reception/bed-grid"
@@ -7,14 +8,28 @@ import { PatientManagement } from "@/components/reception/patient-management"
 import { OccupancyChart } from "@/components/reception/occupancy-chart"
 import { ActivityLog } from "@/components/reception/activity-log"
 import { useStats, usePatients } from "@/hooks/use-hospital"
-import { BedDouble, Users, AlertTriangle, Activity } from "lucide-react"
+import { BedDouble, Users, AlertTriangle, Activity, Loader2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function ReceptionPage() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const stats = useStats()
   const patients = usePatients()
   const inQueueCount = patients.filter(p => p.status === "in-queue").length
   const admittedCount = patients.filter(p => p.status === "admitted").length
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">

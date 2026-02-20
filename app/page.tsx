@@ -1,12 +1,13 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { AppHeader } from "@/components/app-header"
 import { StatCard } from "@/components/stat-card"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { useStats, usePatients, useQueue, useLogs, useBeds } from "@/hooks/use-hospital"
+import { useStats, usePatients, useQueue, useLogs } from "@/hooks/use-hospital"
 import {
   BedDouble,
   Users,
@@ -16,8 +17,8 @@ import {
   Stethoscope,
   ClipboardList,
   Clock,
-  ShieldCheck,
   TrendingUp,
+  Loader2,
 } from "lucide-react"
 import { PriorityBadge } from "@/components/priority-badge"
 import { cn } from "@/lib/utils"
@@ -32,19 +33,36 @@ import {
 } from "recharts"
 
 function formatTimeAgo(date: Date): string {
-  const diff = Date.now() - date.getTime()
+  const now = Date.now()
+  const diff = now - date.getTime()
+  if (diff < 0) return "Just now"
   const minutes = Math.floor(diff / 60000)
   if (minutes < 1) return "Just now"
   if (minutes < 60) return `${minutes}m ago`
-  return `${Math.floor(minutes / 60)}h ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
 }
 
 export default function OverviewPage() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const stats = useStats()
   const patients = usePatients()
   const queue = useQueue()
   const logs = useLogs()
-  const beds = useBeds()
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
   const inQueueCount = patients.filter(p => p.status === "in-queue").length
   const admittedCount = patients.filter(p => p.status === "admitted").length
   const criticalCount = queue.filter(p => p.verifiedPriority === "critical").length

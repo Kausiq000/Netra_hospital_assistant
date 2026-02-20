@@ -1,19 +1,34 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { AppHeader } from "@/components/app-header"
 import { StatCard } from "@/components/stat-card"
 import { PriorityQueue } from "@/components/medical/priority-queue"
 import { AdmittedPatients } from "@/components/medical/admitted-patients"
 import { useStats, useQueue, usePatients } from "@/hooks/use-hospital"
-import { Users, AlertTriangle, BedDouble, Stethoscope } from "lucide-react"
+import { Users, AlertTriangle, BedDouble, Stethoscope, Loader2 } from "lucide-react"
 
 export default function MedicalPage() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const stats = useStats()
   const queue = useQueue()
   const patients = usePatients()
   const criticalCount = queue.filter(p => p.verifiedPriority === "critical").length
   const admittedCount = patients.filter(p => p.status === "admitted").length
   const pendingAdmission = patients.filter(p => p.admissionRequested && p.status === "in-queue").length
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
