@@ -1,0 +1,273 @@
+"use client"
+
+import Link from "next/link"
+import { AppHeader } from "@/components/app-header"
+import { StatCard } from "@/components/stat-card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { useStats, usePatients, useQueue, useLogs, useBeds } from "@/hooks/use-hospital"
+import {
+  BedDouble,
+  Users,
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  Stethoscope,
+  ClipboardList,
+  Clock,
+  ShieldCheck,
+  TrendingUp,
+} from "lucide-react"
+import { PriorityBadge } from "@/components/priority-badge"
+import { cn } from "@/lib/utils"
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts"
+
+function formatTimeAgo(date: Date): string {
+  const diff = Date.now() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return "Just now"
+  if (minutes < 60) return `${minutes}m ago`
+  return `${Math.floor(minutes / 60)}h ago`
+}
+
+export default function OverviewPage() {
+  const stats = useStats()
+  const patients = usePatients()
+  const queue = useQueue()
+  const logs = useLogs()
+  const beds = useBeds()
+  const inQueueCount = patients.filter(p => p.status === "in-queue").length
+  const admittedCount = patients.filter(p => p.status === "admitted").length
+  const criticalCount = queue.filter(p => p.verifiedPriority === "critical").length
+
+  const wardData = [
+    { name: "General", occupied: stats.generalBeds.total - stats.generalBeds.available, available: stats.generalBeds.available },
+    { name: "Emergency", occupied: stats.emergencyBeds.total - stats.emergencyBeds.available, available: stats.emergencyBeds.available },
+    { name: "ICU", occupied: stats.icuBeds.total - stats.icuBeds.available, available: stats.icuBeds.available },
+  ]
+
+  const roleCards = [
+    {
+      title: "Patient Portal",
+      description: "Register, get a token, and track your queue position in real time",
+      icon: ClipboardList,
+      href: "/patient",
+      color: "bg-emerald-500",
+    },
+    {
+      title: "Reception Desk",
+      description: "Manage patient flow, bed allocation, and hospital capacity",
+      icon: Activity,
+      href: "/reception",
+      color: "bg-primary",
+    },
+    {
+      title: "Medical Staff",
+      description: "View priority queue, manage admissions, and coordinate care",
+      icon: Stethoscope,
+      href: "/medical",
+      color: "bg-amber-500",
+    },
+  ]
+
+  return (
+    <div className="min-h-screen bg-background">
+      <AppHeader />
+      <main className="mx-auto max-w-screen-2xl px-4 py-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Hospital Overview</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Real-time capacity and patient flow management
+          </p>
+        </div>
+
+        {/* Surge Alert */}
+        {stats.surgeMode && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <div>
+                <p className="font-semibold text-red-800">Surge Mode Active</p>
+                <p className="text-sm text-red-700">
+                  Hospital occupancy has exceeded {stats.surgeThreshold}%. Consider diverting non-critical cases.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <StatCard
+            title="Total Beds"
+            value={stats.totalBeds}
+            subtitle={`${stats.availableBeds} available`}
+            icon={BedDouble}
+          />
+          <StatCard
+            title="Patients in Queue"
+            value={inQueueCount}
+            subtitle="Waiting for care"
+            icon={Users}
+          />
+          <StatCard
+            title="Occupancy Rate"
+            value={`${stats.occupancyRate}%`}
+            subtitle={`${admittedCount} admitted`}
+            icon={TrendingUp}
+          />
+          <StatCard
+            title="Critical Cases"
+            value={criticalCount}
+            subtitle="Immediate attention"
+            icon={AlertTriangle}
+            iconClassName={criticalCount > 0 ? "bg-red-100" : undefined}
+          />
+        </div>
+
+        {/* Role Cards */}
+        <div className="mb-6 grid gap-4 md:grid-cols-3">
+          {roleCards.map((card) => (
+            <Link key={card.href} href={card.href}>
+              <Card className="group cursor-pointer border-border/60 transition-all hover:border-primary/30 hover:shadow-md">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div className={cn("rounded-lg p-2.5", card.color)}>
+                      <card.icon className="h-5 w-5 text-card" />
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                  </div>
+                  <h3 className="mt-4 font-semibold text-foreground">{card.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{card.description}</p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {/* Bottom Grid */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Ward Occupancy Chart */}
+          <Card className="border-border/60 lg:col-span-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Activity className="h-4 w-4 text-primary" />
+                Ward Occupancy Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={wardData} barGap={4}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="var(--color-muted-foreground)" />
+                    <YAxis tick={{ fontSize: 12 }} stroke="var(--color-muted-foreground)" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "var(--color-card)",
+                        border: "1px solid var(--color-border)",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Bar dataKey="occupied" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Occupied" />
+                    <Bar dataKey="available" fill="#10b981" radius={[4, 4, 0, 0]} name="Available" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Capacity Bars */}
+              <div className="mt-4 flex flex-col gap-3">
+                {wardData.map((ward) => {
+                  const total = ward.occupied + ward.available
+                  const pct = Math.round((ward.occupied / total) * 100)
+                  return (
+                    <div key={ward.name} className="flex items-center gap-3">
+                      <span className="w-20 text-xs font-medium text-muted-foreground">{ward.name}</span>
+                      <Progress value={pct} className="h-2 flex-1" />
+                      <span className="w-12 text-right text-xs font-semibold text-foreground">{pct}%</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick View Sidebar */}
+          <div className="flex flex-col gap-4">
+            {/* Top Queue */}
+            <Card className="border-border/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Users className="h-4 w-4 text-primary" />
+                  Next in Queue
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  {queue.slice(0, 4).map((patient, i) => (
+                    <div key={patient.id} className="flex items-center justify-between rounded-md border border-border/40 p-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-bold text-foreground">
+                          {i + 1}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{patient.name}</p>
+                          <p className="text-xs text-muted-foreground">#{patient.tokenNumber}</p>
+                        </div>
+                      </div>
+                      <PriorityBadge priority={patient.verifiedPriority} />
+                    </div>
+                  ))}
+                  {queue.length === 0 && (
+                    <p className="py-4 text-center text-xs text-muted-foreground">Queue is empty</p>
+                  )}
+                </div>
+                {queue.length > 4 && (
+                  <Link href="/medical">
+                    <Button variant="ghost" className="mt-2 w-full text-xs">
+                      View all {queue.length} patients
+                      <ArrowRight className="ml-1 h-3 w-3" />
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card className="border-border/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-primary" />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2.5">
+                  {logs.slice(0, 5).map((log) => (
+                    <div key={log.id} className="flex items-start gap-2">
+                      <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                      <div>
+                        <p className="text-xs font-medium text-foreground">{log.action}</p>
+                        <p className="text-xs text-muted-foreground">{formatTimeAgo(log.timestamp)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
