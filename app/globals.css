@@ -4,42 +4,46 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.002 240);
-  --foreground: oklch(0.18 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 250);
-  --primary: oklch(0.55 0.18 250);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.95 0.01 240);
-  --secondary-foreground: oklch(0.25 0.03 250);
-  --muted: oklch(0.96 0.005 240);
-  --muted-foreground: oklch(0.50 0.02 250);
-  --accent: oklch(0.60 0.15 175);
-  --accent-foreground: oklch(0.99 0 0);
+  /* ── NETRA Mint × Lavender palette ── */
+  --background: #F4FFF8;          /* bright mint */
+  --foreground: #1a2640;
+  --card: #FFFFFF;
+  --card-foreground: #1a2640;
+  --popover: #FFFFFF;
+  --popover-foreground: #1a2640;
+  --primary: #6c47ff;             /* vibrant violet */
+  --primary-foreground: #ffffff;
+  --secondary: #FAF5FF;           /* soft lavender */
+  --secondary-foreground: #3d2c8d;
+  --muted: #f0fdf4;
+  --muted-foreground: #64748b;
+  --accent: #00c896;              /* teal-mint accent */
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.91 0.01 240);
-  --input: oklch(0.91 0.01 240);
-  --ring: oklch(0.55 0.18 250);
+  --border: #e2f5eb;
+  --input: #e2f5eb;
+  --ring: #6c47ff;
   --chart-1: oklch(0.55 0.18 250);
   --chart-2: oklch(0.60 0.15 175);
   --chart-3: oklch(0.65 0.20 145);
-  --chart-4: oklch(0.70 0.15 80);
-  --chart-5: oklch(0.55 0.20 30);
+  --chart-1: #6c47ff;
+  --chart-2: #00c896;
+  --chart-3: #a78bfa;
+  --chart-4: #34d399;
+  --chart-5: #f59e0b;
   --radius: 0.625rem;
-  --sidebar: oklch(0.99 0.002 240);
-  --sidebar-foreground: oklch(0.18 0.02 250);
-  --sidebar-primary: oklch(0.55 0.18 250);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.95 0.01 240);
-  --sidebar-accent-foreground: oklch(0.25 0.03 250);
-  --sidebar-border: oklch(0.91 0.01 240);
-  --sidebar-ring: oklch(0.55 0.18 250);
+  --sidebar: #FAF5FF;
+  --sidebar-foreground: #1a2640;
+  --sidebar-primary: #6c47ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #F4FFF8;
+  --sidebar-accent-foreground: #3d2c8d;
+  --sidebar-border: #e9d5ff;
+  --sidebar-ring: #6c47ff;
 
-  --success: oklch(0.60 0.15 145);
-  --success-foreground: oklch(0.99 0 0);
+  --success: #00c896;
+  --success-foreground: #ffffff;
   --warning: oklch(0.75 0.15 80);
   --warning-foreground: oklch(0.25 0.05 80);
   --critical: oklch(0.577 0.245 27.325);
@@ -47,41 +51,41 @@
 }
 
 .dark {
-  --background: oklch(0.16 0.02 250);
-  --foreground: oklch(0.95 0.005 240);
-  --card: oklch(0.20 0.02 250);
-  --card-foreground: oklch(0.95 0.005 240);
-  --popover: oklch(0.20 0.02 250);
-  --popover-foreground: oklch(0.95 0.005 240);
-  --primary: oklch(0.65 0.18 250);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.25 0.02 250);
-  --secondary-foreground: oklch(0.95 0.005 240);
-  --muted: oklch(0.25 0.02 250);
-  --muted-foreground: oklch(0.65 0.02 250);
-  --accent: oklch(0.60 0.15 175);
-  --accent-foreground: oklch(0.99 0 0);
+  --background: #0f1629;
+  --foreground: #e2e8f0;
+  --card: #1a2233;
+  --card-foreground: #e2e8f0;
+  --popover: #1a2233;
+  --popover-foreground: #e2e8f0;
+  --primary: #8b6fff;
+  --primary-foreground: #ffffff;
+  --secondary: #1e1633;
+  --secondary-foreground: #c4b5fd;
+  --muted: #1a2233;
+  --muted-foreground: #94a3b8;
+  --accent: #00c896;
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.50 0.20 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.30 0.02 250);
-  --input: oklch(0.30 0.02 250);
-  --ring: oklch(0.65 0.18 250);
-  --chart-1: oklch(0.65 0.18 250);
-  --chart-2: oklch(0.60 0.15 175);
-  --chart-3: oklch(0.65 0.20 145);
-  --chart-4: oklch(0.70 0.15 80);
-  --chart-5: oklch(0.55 0.20 30);
-  --sidebar: oklch(0.18 0.02 250);
-  --sidebar-foreground: oklch(0.95 0.005 240);
-  --sidebar-primary: oklch(0.65 0.18 250);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.25 0.02 250);
-  --sidebar-accent-foreground: oklch(0.95 0.005 240);
-  --sidebar-border: oklch(0.30 0.02 250);
-  --sidebar-ring: oklch(0.65 0.18 250);
+  --border: #2a3550;
+  --input: #2a3550;
+  --ring: #8b6fff;
+  --chart-1: #8b6fff;
+  --chart-2: #00c896;
+  --chart-3: #c4b5fd;
+  --chart-4: #34d399;
+  --chart-5: #f59e0b;
+  --sidebar: #12192a;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #8b6fff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e1633;
+  --sidebar-accent-foreground: #c4b5fd;
+  --sidebar-border: #2a3550;
+  --sidebar-ring: #8b6fff;
 
-  --success: oklch(0.60 0.15 145);
-  --success-foreground: oklch(0.99 0 0);
+  --success: #00c896;
+  --success-foreground: #ffffff;
   --warning: oklch(0.75 0.15 80);
   --warning-foreground: oklch(0.25 0.05 80);
   --critical: oklch(0.55 0.22 27);
@@ -142,4 +146,83 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ===== NETRA animations ===== */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-18px) rotate(3deg); }
+  66% { transform: translateY(-8px) rotate(-2deg); }
+}
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  50% { transform: translateY(-24px) rotate(5deg) scale(1.04); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(108,71,255,0.25); }
+  50% { box-shadow: 0 0 0 20px rgba(108,71,255,0); }
+}
+@keyframes particle-drift {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-30px) translateX(12px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.6; }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in          { animation: fade-in 0.8s ease-out both; }
+.animate-fade-in-up       { animation: fade-in-up 0.7s ease-out both; }
+.animate-fade-in-up-delay { animation: fade-in-up 0.7s 0.15s ease-out both; }
+.animate-fade-in-up-delay-2 { animation: fade-in-up 0.7s 0.30s ease-out both; }
+.animate-fade-in-up-delay-3 { animation: fade-in-up 0.7s 0.45s ease-out both; }
+.animate-float            { animation: float 6s ease-in-out infinite; }
+.animate-float-slow       { animation: float-slow 9s ease-in-out infinite; }
+.animate-pulse-glow       { animation: pulse-glow 2.5s ease-in-out infinite; }
+.animate-particle         { animation: particle-drift 5s ease-in-out infinite; }
+.animate-spin-slow        { animation: spin-slow 20s linear infinite; }
+
+/* ===== Medical background for inner pages ===== */
+.medical-bg {
+  background:
+    linear-gradient(135deg, #e8f4fc 0%, #dbeef9 40%, #e0f0fa 100%);
+  position: relative;
+}
+.medical-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    /* hexagons */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='104' viewBox='0 0 120 104'%3E%3Cpath d='M60 2 L110 28 L110 76 L60 102 L10 76 L10 28Z' fill='none' stroke='%2393c5e8' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 120px 104px;
+}
+.medical-bg::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    /* cross symbols scattered */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Crect x='11' y='4' width='6' height='20' rx='1.5' fill='%23a3d4f0' opacity='0.5'/%3E%3Crect x='4' y='11' width='20' height='6' rx='1.5' fill='%23a3d4f0' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  background-position: 80px 40px;
+  opacity: 0.22;
+}
+.medical-bg > * {
+  position: relative;
+  z-index: 1;
 }

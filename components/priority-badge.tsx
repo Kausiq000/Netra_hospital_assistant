@@ -1,14 +1,18 @@
+"use client"
+
 import { cn } from "@/lib/utils"
+import { useTranslation } from "@/lib/i18n"
 import type { Priority } from "@/lib/types"
 
-const priorityConfig: Record<Priority, { label: string; className: string }> = {
-  mild: { label: "Mild", className: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-  moderate: { label: "Moderate", className: "bg-amber-100 text-amber-800 border-amber-200" },
-  severe: { label: "Severe", className: "bg-orange-100 text-orange-800 border-orange-200" },
-  critical: { label: "Critical", className: "bg-red-100 text-red-800 border-red-200" },
+const priorityConfig: Record<Priority, { labelKey: string; className: string }> = {
+  mild: { labelKey: "common.mild", className: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+  moderate: { labelKey: "common.moderate", className: "bg-amber-100 text-amber-800 border-amber-200" },
+  severe: { labelKey: "common.severe", className: "bg-orange-100 text-orange-800 border-orange-200" },
+  critical: { labelKey: "common.critical", className: "bg-red-100 text-red-800 border-red-200" },
 }
 
 export function PriorityBadge({ priority, className }: { priority: Priority; className?: string }) {
+  const { t } = useTranslation()
   const config = priorityConfig[priority]
   return (
     <span
@@ -18,7 +22,7 @@ export function PriorityBadge({ priority, className }: { priority: Priority; cla
         className
       )}
     >
-      {config.label}
+      {t(config.labelKey)}
     </span>
   )
 }

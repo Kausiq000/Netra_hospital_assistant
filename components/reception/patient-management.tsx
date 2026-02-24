@@ -30,9 +30,9 @@ export function PatientManagement() {
     return true
   })
 
-  function handleAdmit() {
+  async function handleAdmit() {
     if (selectedPatient && selectedBed) {
-      admitPatient(selectedPatient, selectedBed)
+      await admitPatient(selectedPatient, selectedBed)
       toast.success("Patient admitted successfully")
       setAdmitDialogOpen(false)
       setSelectedPatient(null)
@@ -40,13 +40,13 @@ export function PatientManagement() {
     }
   }
 
-  function handleDischarge(patientId: string) {
-    dischargePatient(patientId)
+  async function handleDischarge(patientId: string) {
+    await dischargePatient(patientId)
     toast.success("Patient discharged successfully")
   }
 
-  function handlePriorityChange(patientId: string, newPriority: Priority) {
-    updatePriority(patientId, newPriority)
+  async function handlePriorityChange(patientId: string, newPriority: Priority) {
+    await updatePriority(patientId, newPriority)
     toast.success("Priority updated")
   }
 

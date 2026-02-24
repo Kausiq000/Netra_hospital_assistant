@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
+import { Inter, JetBrains_Mono, Rajdhani, Noto_Sans_Tamil } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
+import { I18nProvider } from '@/lib/i18n'
 import './globals.css'
 
 const inter = Inter({
@@ -14,9 +15,21 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 })
 
+const rajdhani = Rajdhani({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-rajdhani",
+})
+
+const notoSansTamil = Noto_Sans_Tamil({
+  subsets: ["tamil"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-tamil",
+})
+
 export const metadata: Metadata = {
-  title: 'MedFlow - Hospital Capacity Management',
-  description: 'Real-time hospital capacity and patient flow management system. Optimize bed allocation, patient queues, and resource utilization.',
+  title: 'NETRA - Smart Hospital Capacity Management',
+  description: 'NETRA — the all-seeing eye for hospital operations. Optimize capacity, streamline patient flow, and manage resources in real time.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -50,9 +63,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        {children}
-        <Toaster position="top-right" richColors />
+      <body className={`${inter.variable} ${jetbrainsMono.variable} ${rajdhani.variable} ${notoSansTamil.variable} font-sans antialiased`}>
+        <I18nProvider>
+          {children}
+          <Toaster position="top-right" richColors />
+        </I18nProvider>
         <Analytics />
       </body>
     </html>

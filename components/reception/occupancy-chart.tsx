@@ -4,26 +4,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useStats, useBeds } from "@/hooks/use-hospital"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from "recharts"
 import { BarChart3 } from "lucide-react"
+import { useTranslation } from "@/lib/i18n"
 
 export function OccupancyChart() {
   const stats = useStats()
   const beds = useBeds()
+  const { t } = useTranslation()
 
   const barData = [
     {
-      name: "General",
+      name: t("common.general"),
       total: stats.generalBeds.total,
       available: stats.generalBeds.available,
       occupied: stats.generalBeds.total - stats.generalBeds.available,
     },
     {
-      name: "Emergency",
+      name: t("common.emergency"),
       total: stats.emergencyBeds.total,
       available: stats.emergencyBeds.available,
       occupied: stats.emergencyBeds.total - stats.emergencyBeds.available,
     },
     {
-      name: "ICU",
+      name: t("common.icu"),
       total: stats.icuBeds.total,
       available: stats.icuBeds.available,
       occupied: stats.icuBeds.total - stats.icuBeds.available,
@@ -36,10 +38,10 @@ export function OccupancyChart() {
   }, {} as Record<string, number>)
 
   const pieData = [
-    { name: "Available", value: statusCounts.available || 0, color: "#10b981" },
-    { name: "Occupied", value: statusCounts.occupied || 0, color: "#3b82f6" },
-    { name: "Cleaning", value: statusCounts.cleaning || 0, color: "#f59e0b" },
-    { name: "Maintenance", value: statusCounts.maintenance || 0, color: "#94a3b8" },
+    { name: t("common.available"), value: statusCounts.available || 0, color: "#10b981" },
+    { name: t("common.occupied"), value: statusCounts.occupied || 0, color: "#3b82f6" },
+    { name: t("common.cleaning"), value: statusCounts.cleaning || 0, color: "#f59e0b" },
+    { name: t("common.maintenance"), value: statusCounts.maintenance || 0, color: "#94a3b8" },
   ]
 
   return (
@@ -48,7 +50,7 @@ export function OccupancyChart() {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <BarChart3 className="h-4 w-4 text-primary" />
-            Ward Occupancy
+            {t("chart.wardOccupancy")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -66,8 +68,8 @@ export function OccupancyChart() {
                     fontSize: "12px",
                   }}
                 />
-                <Bar dataKey="occupied" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="Occupied" />
-                <Bar dataKey="available" fill="#10b981" radius={[4, 4, 0, 0]} name="Available" />
+                <Bar dataKey="occupied" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name={t("common.occupied")} />
+                <Bar dataKey="available" fill="#10b981" radius={[4, 4, 0, 0]} name={t("common.available")} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -78,7 +80,7 @@ export function OccupancyChart() {
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <BarChart3 className="h-4 w-4 text-primary" />
-            Bed Status Distribution
+            {t("chart.bedDistribution")}
           </CardTitle>
         </CardHeader>
         <CardContent>

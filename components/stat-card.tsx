@@ -1,5 +1,8 @@
+"use client"
+
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
+import { useTranslation } from "@/lib/i18n"
 import type { LucideIcon } from "lucide-react"
 
 interface StatCardProps {
@@ -13,6 +16,7 @@ interface StatCardProps {
 }
 
 export function StatCard({ title, value, subtitle, icon: Icon, trend, className, iconClassName }: StatCardProps) {
+  const { t } = useTranslation()
   return (
     <Card className={cn("border-border/60", className)}>
       <CardContent className="p-5">
@@ -25,7 +29,9 @@ export function StatCard({ title, value, subtitle, icon: Icon, trend, className,
             )}
             {trend && (
               <p className={cn("mt-1 text-xs font-medium", trend.positive ? "text-emerald-600" : "text-red-600")}>
-                {trend.positive ? "+" : ""}{trend.value}% from last hour
+                {trend.positive
+                  ? t("common.trendUp", { value: trend.value })
+                  : t("common.trendDown", { value: trend.value })}
               </p>
             )}
           </div>

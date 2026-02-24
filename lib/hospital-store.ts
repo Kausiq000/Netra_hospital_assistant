@@ -1,381 +1,230 @@
-import type { Patient, Bed, Priority, BedStatus, BedType, WardType, PatientStatus, ActivityLog } from "./types"
+﻿// ── Supabase Hospital Store ──────────────────────────────────────────────────
+// All actions are async and write to Supabase directly.
+// Real-time state is consumed via hooks/use-hospital.ts using Supabase realtime.
 
-// --- Deterministic ID/token generators for seed data ---
-let seedIdCounter = 0
-function seedId(): string {
-  seedIdCounter++
-  return `seed-${seedIdCounter}`
-}
+import { supabase } from "./supabase"
+import type { Priority, BedStatus, WardType, Patient } from "./types"
 
-let tokenCounter = 100
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function generateToken(): number {
-  tokenCounter += 1
-  return tokenCounter
-}
-
-function generateId(): string {
-  return `rt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-}
-
-// --- Seed Data (deterministic - no Math.random or Date.now at module level) ---
-const initialBeds: Bed[] = [
-  // General beds (Floor 1)
-  ...Array.from({ length: 20 }, (_, i) => ({
-    id: `bed-g-${i + 1}`,
-    number: `G-${String(i + 1).padStart(3, "0")}`,
-    type: "general" as BedType,
-    status: (i < 12 ? "occupied" : i < 14 ? "cleaning" : "available") as BedStatus,
-    patientId: null as string | null,
-    floor: 1,
-  })),
-  // Emergency beds (Floor 2)
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `bed-e-${i + 1}`,
-    number: `E-${String(i + 1).padStart(3, "0")}`,
-    type: "emergency" as BedType,
-    status: (i < 6 ? "occupied" : i < 7 ? "maintenance" : "available") as BedStatus,
-    patientId: null as string | null,
-    floor: 2,
-  })),
-  // ICU beds (Floor 3)
-  ...Array.from({ length: 8 }, (_, i) => ({
-    id: `bed-i-${i + 1}`,
-    number: `ICU-${String(i + 1).padStart(3, "0")}`,
-    type: "icu" as BedType,
-    status: (i < 5 ? "occupied" : i < 6 ? "cleaning" : "available") as BedStatus,
-    patientId: null as string | null,
-    floor: 3,
-  })),
-]
-
-const sampleNames = [
-  "Aarav Sharma", "Priya Patel", "Rahul Kumar", "Ananya Singh", "Vikram Reddy",
-  "Sneha Gupta", "Arjun Nair", "Meera Joshi", "Karan Malhotra", "Diya Choudhury",
-  "Rohan Pillai", "Ishita Verma",
-]
-
-const sampleSymptoms = [
-  "Fever, headache, body ache",
-  "Chest pain, shortness of breath",
-  "Abdominal pain, nausea",
-  "Fracture, swelling in left arm",
-  "High fever, cough, difficulty breathing",
-  "Severe headache, blurred vision",
-  "Allergic reaction, skin rash",
-  "Dizziness, fainting spells",
-  "Back pain, numbness in legs",
-  "Burn injuries on hand",
-]
-
-const sampleAges = [32, 45, 28, 56, 41, 33, 27, 62, 38, 50, 29, 44]
-
-const priorities: Priority[] = ["mild", "moderate", "severe", "critical"]
-
-// Use a fixed base timestamp for deterministic seed data
-const BASE_TIME = new Date("2026-02-21T10:00:00Z")
-
-const initialPatients: Patient[] = sampleNames.map((name, i) => {
-  const priority = priorities[i % 4]
-  const wardType: WardType = i < 6 ? "general" : "emergency"
-  const status: PatientStatus = i < 8 ? "in-queue" : "admitted"
-  const token = generateToken()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapPatient(row: any): Patient {
   return {
-    id: seedId(),
-    name,
-    age: sampleAges[i],
-    symptoms: sampleSymptoms[i % sampleSymptoms.length],
-    selfAssessedSeverity: priority,
-    verifiedPriority: priority,
-    wardType,
-    status,
-    tokenNumber: token,
-    queuePosition: i < 8 ? i + 1 : 0,
-    estimatedWaitTime: i < 8 ? (i + 1) * 8 : 0,
-    bedId: null,
-    createdAt: new Date(BASE_TIME.getTime() - (12 - i) * 900000),
-    nurseVerified: i < 10,
-    admissionRequested: i >= 6 && i < 10,
+    id: row.id,
+    name: row.name,
+    age: row.age,
+    symptoms: row.symptoms,
+    selfAssessedSeverity: row.self_assessed_severity,
+    verifiedPriority: row.verified_priority,
+    wardType: row.ward_type,
+    status: row.status,
+    tokenNumber: row.token_number ?? 0,
+    queuePosition: row.queue_position ?? 0,
+    estimatedWaitTime: row.estimated_wait_time ?? 0,
+    bedId: row.bed_id ?? null,
+    createdAt: new Date(row.created_at),
+    nurseVerified: row.nurse_verified ?? false,
+    admissionRequested: row.admission_requested ?? false,
   }
-})
-
-// Assign patients to occupied beds
-let occupiedBedIdx = 0
-initialPatients.forEach(p => {
-  if (p.status === "admitted") {
-    const occupiedBeds = initialBeds.filter(b => b.status === "occupied" && !b.patientId)
-    if (occupiedBedIdx < occupiedBeds.length) {
-      p.bedId = occupiedBeds[occupiedBedIdx].id
-      occupiedBeds[occupiedBedIdx].patientId = p.id
-      occupiedBedIdx++
-    }
-  }
-})
-
-const initialLogs: ActivityLog[] = [
-  { id: seedId(), action: "Patient Registered", details: "Aarav Sharma registered via QR scan", timestamp: new Date(BASE_TIME.getTime() - 3600000 * 3), actor: "System" },
-  { id: seedId(), action: "Priority Updated", details: "Priya Patel priority changed to Severe", timestamp: new Date(BASE_TIME.getTime() - 3600000 * 2), actor: "Dr. Mehta" },
-  { id: seedId(), action: "Bed Assigned", details: "Bed G-009 assigned to Rahul Kumar", timestamp: new Date(BASE_TIME.getTime() - 3600000), actor: "Reception" },
-  { id: seedId(), action: "Patient Discharged", details: "Patient in ICU-003 discharged", timestamp: new Date(BASE_TIME.getTime() - 1800000), actor: "Dr. Singh" },
-  { id: seedId(), action: "Surge Alert", details: "Occupancy exceeded 85% threshold", timestamp: new Date(BASE_TIME.getTime() - 900000), actor: "System" },
-]
-
-// --- Store ---
-let patients = [...initialPatients]
-let beds = [...initialBeds]
-let logs = [...initialLogs]
-const surgeThreshold = 85
-
-// --- Version counter for cache invalidation ---
-let version = 0
-
-type Listener = () => void
-const listeners = new Set<Listener>()
-
-function notify() {
-  version++
-  // Invalidate all cached snapshots
-  cachedPatients = null
-  cachedBeds = null
-  cachedStats = null
-  cachedQueue = null
-  cachedLogs = null
-  listeners.forEach(l => l())
 }
 
-export function subscribe(listener: Listener): () => void {
-  listeners.add(listener)
-  return () => listeners.delete(listener)
+async function addLog(action: string, details: string, actor: string): Promise<void> {
+  await supabase.from("activity_logs").insert({ action, details, actor })
 }
 
-// --- Cached snapshot approach ---
-// Each getter returns the same reference until notify() is called
-
-let cachedPatients: Patient[] | null = null
-export function getPatients(): Patient[] {
-  if (!cachedPatients) {
-    cachedPatients = [...patients]
-  }
-  return cachedPatients
+async function getNextToken(): Promise<number> {
+  const { data } = await supabase
+    .from("patients")
+    .select("token_number")
+    .order("token_number", { ascending: false })
+    .limit(1)
+    .single()
+  return (data?.token_number ?? 100) + 1
 }
 
-let cachedBeds: Bed[] | null = null
-export function getBeds(): Bed[] {
-  if (!cachedBeds) {
-    cachedBeds = [...beds]
-  }
-  return cachedBeds
-}
+// ─── Actions ─────────────────────────────────────────────────────────────────
 
-let cachedLogs: ActivityLog[] | null = null
-export function getLogs(): ActivityLog[] {
-  if (!cachedLogs) {
-    cachedLogs = [...logs].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-  }
-  return cachedLogs
-}
-
-export function getPatientById(id: string): Patient | undefined {
-  return patients.find(p => p.id === id)
-}
-
-export function getPatientByToken(token: number): Patient | undefined {
-  return patients.find(p => p.tokenNumber === token)
-}
-
-export type HospitalStats = {
-  totalBeds: number
-  availableBeds: number
-  occupiedBeds: number
-  icuBeds: { total: number; available: number }
-  emergencyBeds: { total: number; available: number }
-  generalBeds: { total: number; available: number }
-  occupancyRate: number
-  surgeMode: boolean
-  surgeThreshold: number
-}
-
-let cachedStats: HospitalStats | null = null
-export function getStats(): HospitalStats {
-  if (!cachedStats) {
-    const totalBeds = beds.length
-    const availableBeds = beds.filter(b => b.status === "available").length
-    const occupiedBeds = beds.filter(b => b.status === "occupied").length
-    const icuTotal = beds.filter(b => b.type === "icu")
-    const emergencyTotal = beds.filter(b => b.type === "emergency")
-    const generalTotal = beds.filter(b => b.type === "general")
-    const occupancyRate = Math.round((occupiedBeds / totalBeds) * 100)
-
-    cachedStats = {
-      totalBeds,
-      availableBeds,
-      occupiedBeds,
-      icuBeds: { total: icuTotal.length, available: icuTotal.filter(b => b.status === "available").length },
-      emergencyBeds: { total: emergencyTotal.length, available: emergencyTotal.filter(b => b.status === "available").length },
-      generalBeds: { total: generalTotal.length, available: generalTotal.filter(b => b.status === "available").length },
-      occupancyRate,
-      surgeMode: occupancyRate >= surgeThreshold,
-      surgeThreshold,
-    }
-  }
-  return cachedStats
-}
-
-let cachedQueue: Patient[] | null = null
-export function getQueue(): Patient[] {
-  if (!cachedQueue) {
-    cachedQueue = patients
-      .filter(p => p.status === "in-queue")
-      .sort((a, b) => {
-        const priorityOrder: Record<Priority, number> = { critical: 0, severe: 1, moderate: 2, mild: 3 }
-        const diff = priorityOrder[a.verifiedPriority] - priorityOrder[b.verifiedPriority]
-        if (diff !== 0) return diff
-        return a.createdAt.getTime() - b.createdAt.getTime()
-      })
-  }
-  return cachedQueue
-}
-
-function recalculateQueue() {
-  // Force queue recalculation
-  cachedQueue = null
-  const queue = getQueue()
-  queue.forEach((p, i) => {
-    const patient = patients.find(pt => pt.id === p.id)
-    if (patient) {
-      patient.queuePosition = i + 1
-      patient.estimatedWaitTime = (i + 1) * 8
-    }
-  })
-  // Reset again since we modified patients
-  cachedQueue = null
-}
-
-export function registerPatient(data: {
+export async function registerPatient(data: {
   name: string
   age: number
   symptoms: string
   selfAssessedSeverity: Priority
   wardType: WardType
-}): Patient {
-  const patient: Patient = {
-    id: generateId(),
-    ...data,
-    verifiedPriority: data.selfAssessedSeverity,
-    status: "in-queue",
-    tokenNumber: generateToken(),
-    queuePosition: 0,
-    estimatedWaitTime: 0,
-    bedId: null,
-    createdAt: new Date(),
-    nurseVerified: false,
-    admissionRequested: false,
-  }
-  patients.push(patient)
-  recalculateQueue()
-  addLog("Patient Registered", `${patient.name} (Token #${patient.tokenNumber}) registered`, "System")
-  notify()
-  return patient
+}): Promise<Patient> {
+  const tokenNumber = await getNextToken()
+
+  // Critical patients are inserted with status "in-queue" (satisfies DB constraint)
+  // but nurse_verified = false acts as the "pending verification" gate.
+  // The queue hook excludes unverified critical patients from numbered positions
+  // until a nurse verifies them, at which point they jump to position 1.
+  const { data: row, error } = await supabase
+    .from("patients")
+    .insert({
+      name: data.name,
+      age: data.age,
+      symptoms: data.symptoms,
+      self_assessed_severity: data.selfAssessedSeverity,
+      verified_priority: data.selfAssessedSeverity,
+      ward_type: data.wardType,
+      status: "in-queue",
+      token_number: tokenNumber,
+      queue_position: 0,
+      estimated_wait_time: 0,
+      nurse_verified: false,
+      admission_requested: false,
+    })
+    .select()
+    .single()
+
+  if (error || !row) throw new Error(error?.message ?? "Registration failed")
+
+  const isCritical = data.selfAssessedSeverity === "critical"
+  const logMsg = isCritical
+    ? `${data.name} (Token #${tokenNumber}) registered as CRITICAL — awaiting nurse verification`
+    : `${data.name} (Token #${tokenNumber}) registered`
+  await addLog("Patient Registered", logMsg, "System")
+  return mapPatient(row)
 }
 
-export function verifyPatient(patientId: string): void {
-  const patient = patients.find(p => p.id === patientId)
-  if (patient) {
-    patient.nurseVerified = true
-    addLog("Patient Verified", `${patient.name} verified by nurse`, "Nurse")
-    notify()
-  }
+export async function verifyPatient(patientId: string): Promise<void> {
+  const { data: patient } = await supabase
+    .from("patients")
+    .select("name, status")
+    .eq("id", patientId)
+    .single()
+
+  // Mark as nurse-verified. The queue hook will now include this patient
+  // and sort them to position 1 (critical = highest priority).
+  // Also flag admission_requested so Admin sees a bed-allocation alert immediately.
+  await supabase
+    .from("patients")
+    .update({ nurse_verified: true, queue_position: 0, estimated_wait_time: 0, admission_requested: true })
+    .eq("id", patientId)
+
+  if (patient)
+    await addLog(
+      "Bed Request",
+      `CRITICAL: ${patient.name} verified by nurse — bed assignment needed immediately`,
+      "Nurse"
+    )
 }
 
-export function updatePriority(patientId: string, newPriority: Priority): void {
-  const patient = patients.find(p => p.id === patientId)
-  if (patient) {
-    const oldPriority = patient.verifiedPriority
-    patient.verifiedPriority = newPriority
-    recalculateQueue()
-    addLog("Priority Updated", `${patient.name}: ${oldPriority} -> ${newPriority}`, "Reception")
-    notify()
-  }
+export async function updatePriority(patientId: string, newPriority: Priority): Promise<void> {
+  const { data: patient } = await supabase
+    .from("patients")
+    .select("name, verified_priority")
+    .eq("id", patientId)
+    .single()
+
+  await supabase
+    .from("patients")
+    .update({ verified_priority: newPriority })
+    .eq("id", patientId)
+
+  if (patient)
+    await addLog(
+      "Priority Updated",
+      `${patient.name}: ${patient.verified_priority} -> ${newPriority}`,
+      "Reception"
+    )
 }
 
-export function requestAdmission(patientId: string): void {
-  const patient = patients.find(p => p.id === patientId)
-  if (patient) {
-    patient.admissionRequested = true
-    addLog("Admission Requested", `Admission requested for ${patient.name}`, "Doctor")
-    notify()
-  }
+export async function requestAdmission(patientId: string): Promise<void> {
+  const { data: patient } = await supabase
+    .from("patients")
+    .select("name")
+    .eq("id", patientId)
+    .single()
+
+  await supabase
+    .from("patients")
+    .update({ admission_requested: true })
+    .eq("id", patientId)
+
+  if (patient)
+    await addLog("Admission Requested", `Admission requested for ${patient.name}`, "Doctor")
 }
 
-export function admitPatient(patientId: string, bedId: string): void {
-  const patient = patients.find(p => p.id === patientId)
-  const bed = beds.find(b => b.id === bedId)
-  if (patient && bed && bed.status === "available") {
-    patient.status = "admitted"
-    patient.bedId = bedId
-    patient.queuePosition = 0
-    patient.estimatedWaitTime = 0
-    bed.status = "occupied"
-    bed.patientId = patientId
-    recalculateQueue()
-    addLog("Patient Admitted", `${patient.name} admitted to bed ${bed.number}`, "Reception")
-    notify()
-  }
+export async function admitPatient(patientId: string, bedId: string): Promise<void> {
+  const { data: patient } = await supabase
+    .from("patients")
+    .select("name")
+    .eq("id", patientId)
+    .single()
+
+  const { data: bed } = await supabase
+    .from("beds")
+    .select("number, status")
+    .eq("id", bedId)
+    .single()
+
+  if (!bed || bed.status !== "available") return
+
+  await supabase.from("patients").update({
+    status: "admitted",
+    bed_id: bedId,
+    queue_position: 0,
+    estimated_wait_time: 0,
+  }).eq("id", patientId)
+
+  await supabase.from("beds").update({
+    status: "occupied",
+    patient_id: patientId,
+  }).eq("id", bedId)
+
+  if (patient && bed)
+    await addLog("Patient Admitted", `${patient.name} admitted to bed ${bed.number}`, "Reception")
 }
 
-export function dischargePatient(patientId: string): void {
-  const patient = patients.find(p => p.id === patientId)
-  if (patient) {
-    if (patient.bedId) {
-      const bed = beds.find(b => b.id === patient.bedId)
-      if (bed) {
-        bed.status = "cleaning"
-        bed.patientId = null
-      }
-    }
-    patient.status = "discharged"
-    patient.bedId = null
-    recalculateQueue()
-    addLog("Patient Discharged", `${patient.name} discharged`, "Reception")
-    notify()
+export async function dischargePatient(patientId: string): Promise<void> {
+  const { data: patient } = await supabase
+    .from("patients")
+    .select("name, bed_id")
+    .eq("id", patientId)
+    .single()
+
+  if (!patient) return
+
+  await supabase.from("patients").update({ status: "discharged", bed_id: null }).eq("id", patientId)
+
+  if (patient.bed_id) {
+    await supabase.from("beds").update({ status: "cleaning", patient_id: null }).eq("id", patient.bed_id)
   }
+
+  await addLog("Patient Discharged", `${patient.name} discharged`, "Reception")
 }
 
-export function updateBedStatus(bedId: string, status: BedStatus): void {
-  const bed = beds.find(b => b.id === bedId)
-  if (bed) {
-    if (bed.status === "occupied" && status !== "occupied") {
-      const patient = patients.find(p => p.bedId === bedId)
-      if (patient) {
-        patient.status = "discharged"
-        patient.bedId = null
-      }
-    }
-    bed.status = status
-    if (status !== "occupied") {
-      bed.patientId = null
-    }
-    addLog("Bed Status Updated", `Bed ${bed.number}: ${status}`, "Reception")
-    notify()
+export async function updateBedStatus(bedId: string, status: BedStatus): Promise<void> {
+  const { data: bed } = await supabase
+    .from("beds")
+    .select("number, status, patient_id")
+    .eq("id", bedId)
+    .single()
+
+  if (!bed) return
+
+  await supabase.from("beds").update({ status, patient_id: status === "occupied" ? bed.patient_id : null }).eq("id", bedId)
+
+  // If moving a bed away from "occupied", discharge the patient occupying it
+  if (bed.status === "occupied" && status !== "occupied" && bed.patient_id) {
+    await supabase.from("patients").update({ status: "discharged", bed_id: null }).eq("id", bed.patient_id)
   }
+
+  if (bed) await addLog("Bed Status Updated", `Bed ${bed.number} → ${status}`, "Reception")
 }
 
-export function emergencyOverride(patientId: string): void {
-  const patient = patients.find(p => p.id === patientId)
-  if (patient) {
-    patient.verifiedPriority = "critical"
-    recalculateQueue()
-    addLog("Emergency Override", `${patient.name} escalated to CRITICAL`, "Doctor")
-    notify()
-  }
-}
+export async function emergencyOverride(patientId: string): Promise<void> {
+  const { data: patient } = await supabase
+    .from("patients")
+    .select("name")
+    .eq("id", patientId)
+    .single()
 
-function addLog(action: string, details: string, actor: string) {
-  logs.push({
-    id: generateId(),
-    action,
-    details,
-    timestamp: new Date(),
-    actor,
-  })
+  await supabase
+    .from("patients")
+    .update({ verified_priority: "critical" })
+    .eq("id", patientId)
+
+  if (patient)
+    await addLog("Emergency Override", `${patient.name} escalated to CRITICAL`, "Doctor")
 }

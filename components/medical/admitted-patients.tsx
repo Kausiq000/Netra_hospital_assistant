@@ -8,10 +8,12 @@ import { usePatients, useBeds } from "@/hooks/use-hospital"
 import { dischargePatient } from "@/lib/hospital-store"
 import { BedDouble, LogOut } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslation } from "@/lib/i18n"
 
 export function AdmittedPatients() {
   const patients = usePatients()
   const beds = useBeds()
+  const { t } = useTranslation()
   const admitted = patients.filter(p => p.status === "admitted")
 
   function getBedNumber(bedId: string | null): string {
@@ -26,10 +28,10 @@ export function AdmittedPatients() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <BedDouble className="h-4 w-4 text-primary" />
-            Admitted Patients
+            {t("ap.title")}
           </CardTitle>
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-            {admitted.length} patients
+            {t("common.patients", { count: admitted.length })}
           </span>
         </div>
       </CardHeader>
@@ -52,7 +54,7 @@ export function AdmittedPatients() {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <BedDouble className="h-3 w-3" />
-                      Bed {getBedNumber(patient.bedId)}
+                      {t("common.bed", { id: getBedNumber(patient.bedId) })}
                     </span>
                     <span className="capitalize">{patient.wardType}</span>
                   </div>
@@ -62,11 +64,11 @@ export function AdmittedPatients() {
                     className="h-7 text-xs"
                     onClick={() => {
                       dischargePatient(patient.id)
-                      toast.success(`${patient.name} discharged`)
+                      toast.success(t("ap.dischargeToast", { name: patient.name }))
                     }}
                   >
                     <LogOut className="mr-1 h-3 w-3" />
-                    Discharge
+                    {t("ap.discharge")}
                   </Button>
                 </div>
                 <div className="mt-2 rounded-md bg-muted/40 p-2">
@@ -77,7 +79,7 @@ export function AdmittedPatients() {
             {admitted.length === 0 && (
               <div className="py-12 text-center text-muted-foreground">
                 <BedDouble className="mx-auto mb-3 h-8 w-8 opacity-30" />
-                <p className="font-medium">No admitted patients</p>
+                <p className="font-medium">{t("ap.empty")}</p>
               </div>
             )}
           </div>
