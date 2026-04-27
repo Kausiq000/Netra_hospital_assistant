@@ -1,216 +1,206 @@
-# 👁️ NETRA
+# 👁️ NETRA Hospital Assistant
 
 <p align="center">
-  <b>Production-Ready Machine Learning Prediction API & Intelligent Decision Support System</b>
+  <b>AI-Powered Smart Hospital Operations, Triage & Resource Management Platform</b>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Python-Backend-3776AB?style=for-the-badge&labelColor=111827" />
-  <img src="https://img.shields.io/badge/Flask-REST_API-000000?style=for-the-badge&labelColor=111827" />
-  <img src="https://img.shields.io/badge/Machine_Learning-Inference-F59E0B?style=for-the-badge&labelColor=111827" />
-  <img src="https://img.shields.io/badge/Validation-Structured_Input-22C55E?style=for-the-badge&labelColor=111827" />
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/CORS-Enabled-06B6D4?style=for-the-badge&labelColor=111827" />
-  <img src="https://img.shields.io/badge/Pipeline-Multi_Stage-A855F7?style=for-the-badge&labelColor=111827" />
-  <img src="https://img.shields.io/badge/Deployment-Ready-14B8A6?style=for-the-badge&labelColor=111827" />
-  <img src="https://img.shields.io/badge/Status-Working_Prototype-84CC16?style=for-the-badge&labelColor=111827" />
+  <img src="https://img.shields.io/badge/Next.js-App_Router-111827?style=for-the-badge&logo=nextdotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-19-2563EB?style=for-the-badge&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/Supabase-Realtime-16A34A?style=for-the-badge&logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/FastAPI-ML_Service-06B6D4?style=for-the-badge&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/Status-Production_Prototype-9333EA?style=for-the-badge" />
 </p>
 
 ---
 
-## 🌍 Vision
+## 🏥 Vision
 
-<p align="center">
-Transform raw structured data into fast, reliable and scalable machine learning decisions.
-</p>
+NETRA is an intelligent hospital assistant platform that digitizes the complete patient lifecycle:
 
----
+```txt id="3f2wke"
+Arrival → AI Triage → Queue Management → Bed Allocation
+→ Doctor Workflow → Emergency Handling → Resource Forecasting
+```
 
-## 📌 Problem Statement
-
-Many organizations rely on:
-
-* Slow manual evaluations
-* Inconsistent human judgment
-* Fragmented data workflows
-* Delayed decisions
-* Non-scalable rule-based systems
-
-Modern systems need intelligent real-time prediction engines.
+Designed to reduce wait times, optimize hospital resources, and improve patient experience.
 
 ---
 
-## 🚀 Solution
+## 🚀 Core Modules
 
-NETRA is a production-style machine learning API that accepts structured multi-field inputs, processes them through a validation and inference pipeline, and returns real-time predictions for decision support.
+## 🧍 Patient Kiosk Portal
 
-It is designed for integration into dashboards, web apps and enterprise workflows.
+Self-service check-in for incoming patients.
+
+Features:
+
+* Symptom & patient detail intake
+* Smart queue registration
+* AI-assisted severity estimation
+* Faster onboarding with reduced manual load
 
 ---
 
-## 🏗️ System Architecture
+## 🩺 Nurse & Reception Portal
 
-```text id="l6c9fp"
-         ┌──────────────────────┐
-         │ Client / Frontend UI │
-         │ JSON Payload Submit  │
-         └──────────┬───────────┘
-                    │
-                    ▼
-         ┌──────────────────────┐
-         │ Flask REST API Layer │
-         │ Validation + Routing │
-         └──────────┬───────────┘
-                    │
-                    ▼
-         ┌──────────────────────┐
-         │ ML Pipeline Engine   │
-         │ Preprocess Features  │
-         └──────────┬───────────┘
-                    │
-                    ▼
-         ┌──────────────────────┐
-         │ Prediction Model     │
-         │ Real-Time Inference  │
-         └──────────┬───────────┘
-                    │
-                    ▼
-         ┌──────────────────────┐
-         │ JSON Response Output │
-         └──────────────────────┘
+Operational dashboard for triage teams.
+
+Features:
+
+* Live queue visibility
+* Priority verification
+* Route patient to doctor / admission
+* Emergency notifications
+* Real-time updates via Supabase Realtime
+
+---
+
+## 🛏️ Bed & Admin Dashboard
+
+Resource command center for hospital staff.
+
+Features:
+
+* Ward-wise bed management
+* ICU / Emergency / General tracking
+* Overflow prediction support
+* Smart admission workflows
+
+---
+
+## 👨‍⚕️ Doctor Portal
+
+Dedicated workflow system for doctors.
+
+Features:
+
+* Review appointment requests
+* Approve / reject schedules
+* Surgery mode alerts
+* Auto-detect impacted appointments
+* Rescheduling coordination
+
+---
+
+## 🤖 AI / ML Intelligence Layer
+
+Powered by FastAPI microservice + trained models.
+
+Predictions include:
+
+* Patient Length of Stay (LOS)
+* Required ward type
+* Overflow probability
+* Resource planning signals
+
+Models powered by:
+
+```txt id="i3ehq6"
+Scikit-learn
+XGBoost
+Pandas
+NumPy
 ```
 
 ---
 
-## ⚙️ Core Features
+## 🏗️ Architecture
 
-### 🤖 Real-Time Predictions
-
-Generate outputs instantly from structured input payloads.
-
-### 📦 23-Field Input Support
-
-Designed to process rich multi-parameter data.
-
-### 🧪 Validation Engine
-
-Rejects malformed requests with proper error handling.
-
-### 🔄 Multi-Stage Pipeline
-
-Validation → Preprocessing → Prediction → Response.
-
-### 🌐 API Integration Ready
-
-Easy to connect with React apps, dashboards or third-party systems.
-
-### 🛡️ Robust Error Handling
-
-400 validation responses and 500 model safety fallbacks.
-
----
-
-## 🔄 Operational Flow
-
-```text id="bh1f5n"
-Send JSON Payload
-→ Validate Request
-→ Preprocess Features
-→ Run ML Model
-→ Generate Prediction
-→ Return JSON Response
+```txt id="8zz8xa"
+Frontend (Next.js + React + TypeScript)
+        ↓
+Supabase Backend
+(Database + Auth + Realtime + RLS)
+        ↓
+FastAPI ML Microservice
+(LOS / Overflow / Ward Prediction)
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer      | Technology                    |
-| ---------- | ----------------------------- |
-| Backend    | Python                        |
-| Framework  | Flask                         |
-| ML Stack   | scikit-learn / model pipeline |
-| API Format | REST + JSON                   |
-| Security   | CORS Enabled                  |
-| Deployment | Production Ready              |
+| Layer        | Technology                        |
+| ------------ | --------------------------------- |
+| Frontend     | Next.js 16, React 19, TypeScript  |
+| UI           | Tailwind CSS, shadcn/ui, Radix UI |
+| Forms        | React Hook Form, Zod              |
+| Charts       | Recharts                          |
+| Backend      | Supabase                          |
+| Database     | PostgreSQL                        |
+| Auth         | Supabase Auth                     |
+| Realtime     | Supabase Subscriptions            |
+| ML Service   | Python FastAPI                    |
+| ML Libraries | XGBoost, Scikit-learn             |
 
 ---
 
-## 📂 Repository Structure
+## 🔐 Security & Access Control
 
-```text id="h4j7qc"
-NETRA/
-├── app.py
-├── model/
-├── utils/
-├── requirements.txt
-├── README.md
-└── docs/
+Role-based access powered by Supabase Auth:
+
+```txt id="gjttvq"
+Admin
+Doctor
+Nurse
+Patient
 ```
 
+Protected using:
+
+* Row Level Security (RLS)
+* Scoped access rules
+* Audit activity logs
+
 ---
 
-## ⚙️ Quick Start
+## 📊 Why This Project Stands Out
 
-### Install Dependencies
+NETRA combines multiple engineering domains:
 
-```bash id="z1eqk0"
+* Full Stack Product Engineering
+* AI / ML Deployment
+* Real-time Systems
+* Healthcare Workflow Design
+* Database Architecture
+* Role-based Security Systems
+
+---
+
+## ⚙️ Run Locally
+
+```bash id="myl0ke"
+npm install
+npm run dev
+```
+
+ML Service:
+
+```bash id="r6zt8m"
+cd ml-service
 pip install -r requirements.txt
-```
-
-### Run API Server
-
-```bash id="myvvxe"
-python app.py
+uvicorn main:app --reload
 ```
 
 ---
 
-## 🌐 Default Access
+## 🌍 Real-World Impact
 
-```text id="pwx5sx"
-API Base URL: http://localhost:5000
-Health Check: GET /
-Prediction: POST /predict
-```
+Ideal for:
 
----
-
-## 📥 Example Request
-
-```json id="8m7tdu"
-{
-  "feature_1": 10,
-  "feature_2": 22,
-  "feature_3": 5
-}
-```
+* Hospitals
+* Clinics
+* Smart emergency centers
+* Queue-heavy healthcare systems
+* Capacity planning environments
 
 ---
 
-## 🎯 Why It Matters
+## 🔮 Future Enhancements
 
-```text id="5zrdph"
-❌ Manual decisions are slow
-❌ Rule systems don’t scale
-❌ Poor data handling creates errors
-
-✅ NETRA enables intelligent real-time prediction workflows
-```
-
----
-
-## 🔮 Future Improvements
-
-* Model monitoring dashboard
-* Authentication tokens
-* Batch prediction endpoint
-* Explainable AI outputs
-* Docker deployment
-* CI/CD model release pipeline
-
----
-
-Building production-grade AI systems with practical impact.
+* Voice-enabled kiosk assistant
+* Multi-hospital analytics dashboard
+* Predictive emergency surge planning
+* Mobile patient companion app
+* Computer vision triage intake
